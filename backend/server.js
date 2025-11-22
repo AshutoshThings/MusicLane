@@ -1,13 +1,18 @@
+require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 
-const songsRouter = require("./routes/songs");
+const authRouter = require("./routes/auth");
+const playlistsRouter = require("./routes/playlists");
 
 const app = express();
+
 app.use(cors());
 app.use(express.json());
 
-app.use("/api/songs", songsRouter);
+//Mounting Routes
+app.use("/api/auth", authRouter);
+app.use("/api/playlists", playlistsRouter);
 
 const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => {
