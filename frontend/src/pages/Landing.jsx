@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import GradientMesh from "../components/GradientMesh";
 import {
   Music,
@@ -22,7 +22,7 @@ import ThemeToggle from "../components/ThemeToggle";
 
 const uploadedPdfPath = "/home/ubuntu/MusicLane-print.pdf";
 
-//dummy data will fetch this through api.
+// Demo songs for the landing page player.
 const DEMO_SONGS = [
   {
     id: 1,
@@ -70,10 +70,28 @@ const DEMO_SONGS = [
 
 export default function Landing() {
   const [open, setOpen] = useState(false);
+  const [dbStats, setDbStats] = useState({ tracks: 0, playlists: 0, users: 0 });
 
+  // Audio Player State
   const [currentSong, setCurrentSong] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef(new Audio());
+
+  useEffect(() => {
+    // Will Fetch stats from backend
+    const fetchStats = async () => {
+      try {
+        const res = await fetch("http://localhost:5001/api/playlists/stats");
+        if (res.ok) {
+          const data = await res.json();
+          setDbStats(data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch stats", err);
+      }
+    };
+    fetchStats();
+  }, []);
 
   const handlePlay = (song) => {
     if (currentSong?.id === song.id) {
@@ -115,7 +133,6 @@ export default function Landing() {
       <GradientMesh />
       <MobileNav open={open} onClose={() => setOpen(false)} />
 
-      {}
       <nav className="fixed top-0 w-full z-50 px-6 md:px-10 py-4 border-b border-white/[0.05] bg-black/50 backdrop-blur-md">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3 group cursor-pointer">
@@ -153,7 +170,6 @@ export default function Landing() {
         </div>
       </nav>
 
-      {}
       <header className="relative pt-40 pb-20 px-6 flex flex-col items-center text-center">
         <div className="max-w-4xl space-y-8 animate-fade-in-up">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-medium tracking-wide uppercase mb-4">
@@ -166,8 +182,8 @@ export default function Landing() {
           </h1>
 
           <p className="text-zinc-400 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
-            Experience a blazing-fast, ad-free, community-powered platform.
-            Beautiful UI, instant playback, and purely legal sourcing.
+            Experience a blazing-fast, ad-free, music streaming platform. <br />
+            Instant playback, and purely legal sourcing.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center gap-4 justify-center pt-4">
@@ -177,45 +193,9 @@ export default function Landing() {
             >
               Start Listening <ArrowRight size={18} />
             </Link>
-            <a
-              href={encodeURI(uploadedPdfPath)}
-              target="_blank"
-              rel="noreferrer"
-              className="w-full sm:w-auto px-8 py-4 glass glass-hover rounded-full text-zinc-300 font-medium flex items-center justify-center gap-2"
-            >
-              View Brief
-            </a>
           </div>
         </div>
 
-        {}
-        <div className="mt-24 w-full max-w-6xl animate-fade-in-up delay-300 px-4">
-          <div className="flex items-center justify-center mb-12">
-            <h3 className="text-xl font-bold flex items-center gap-2 text-zinc-200">
-              <BarChart3 className="text-indigo-400" size={18} /> Trending Now
-            </h3>
-          </div>
-
-          {}
-          <div className="grid grid-cols-3 md:grid-cols-5 lg:grid-cols-6 gap-8 pb-12">
-            {DEMO_SONGS.map((song, index) => (
-              <div
-                key={song.id}
-                className={`transition-transform duration-500 ${
-                  index % 2 !== 0 ? "translate-y-8" : ""
-                }`}
-              >
-                <MusicTile
-                  song={song}
-                  isPlaying={isPlaying && currentSong?.id === song.id}
-                  onPlay={() => handlePlay(song)}
-                />
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {}
         <div className="mt-24 w-full max-w-5xl grid grid-cols-1 md:grid-cols-3 gap-6 animate-fade-in-up delay-200">
           <FeaturePill
             icon={<Sparkles />}
@@ -233,9 +213,33 @@ export default function Landing() {
             desc="No interruptions, ever."
           />
         </div>
+
+        <div className="mt-24 w-full max-w-6xl animate-fade-in-up delay-300 px-4">
+          <div className="flex items-center justify-center mb-12">
+            <h3 className="text-xl font-bold flex items-center gap-2 text-zinc-200">
+              <BarChart3 className="text-indigo-400" size={18} /> Trending Now
+            </h3>
+          </div>
+
+          <div className="grid grid-cols-3 md:grid-cols-5 lg:grid-cols-6 gap-8 pb-12">
+            {DEMO_SONGS.map((song, index) => (
+              <div
+                key={song.id}
+                className={`transition-transform duration-500 ${
+                  index % 2 !== 0 ? "translate-y-8" : ""
+                }`}
+              >
+                <MusicTile
+                  song={song}
+                  isPlaying={isPlaying && currentSong?.id === song.id}
+                  onPlay={() => handlePlay(song)}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
       </header>
 
-      {}
       <section className="py-24 px-6 relative z-10">
         <div className="max-w-6xl mx-auto">
           <div className="mb-16 text-center md:text-left">
@@ -244,7 +248,7 @@ export default function Landing() {
             </h2>
             <p className="text-zinc-400 max-w-xl">
               We stripped away the clutter to focus on what matters: the music
-              and the code behind it.
+              and the memories behind it.
             </p>
           </div>
 
@@ -271,7 +275,6 @@ export default function Landing() {
         </div>
       </section>
 
-      {}
       <section className="py-24 border-t border-white/[0.05] bg-black/20 backdrop-blur-sm">
         <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center gap-12">
           <div className="flex-1 space-y-6">
@@ -281,9 +284,9 @@ export default function Landing() {
               optimized for high concurrency and low latency.
             </p>
             <div className="grid grid-cols-3 gap-4 pt-4">
-              <Stats label="Tracks" value={5234} suffix="+" />
-              <Stats label="Playlists" value={1240} />
-              <Stats label="Users" value={892} />
+              <Stats label="Tracks" value={dbStats.tracks} suffix="+" />
+              <Stats label="Playlists" value={dbStats.playlists} />
+              <Stats label="Users" value={dbStats.users} />
             </div>
           </div>
 
@@ -321,20 +324,16 @@ export default function Landing() {
         </div>
       </section>
 
-      {}
       <footer className="py-12 border-t border-white/[0.05] text-center">
         <div className="text-zinc-500 text-sm mb-4">
           Built by <span className="text-zinc-300">Ashutosh Vishwakarma</span>
         </div>
         <div className="flex justify-center gap-6 text-sm font-medium text-zinc-400">
-          <a href="#" className="hover:text-white transition-colors">
+          <a
+            href="https://www.github.com/AshutoshThings/MusicLane"
+            className="hover:text-white transition-colors"
+          >
             GitHub
-          </a>
-          <a href="#" className="hover:text-white transition-colors">
-            Twitter
-          </a>
-          <a href="#" className="hover:text-white transition-colors">
-            Contact
           </a>
         </div>
       </footer>
@@ -342,8 +341,7 @@ export default function Landing() {
   );
 }
 
-//Additional helper components
-
+//Sub Components
 function FeaturePill({ icon, title, desc }) {
   return (
     <div className="flex items-center gap-4 glass p-4 rounded-2xl transition-transform hover:scale-[1.02]">
@@ -364,17 +362,13 @@ function MusicTile({ song, isPlaying, onPlay }) {
       onClick={onPlay}
       className="group relative w-full aspect-square rounded-2xl cursor-pointer overflow-hidden hover:shadow-xl hover:shadow-indigo-500/20 transition-all duration-300 ring-1 ring-white/10 hover:ring-white/30"
     >
-      {}
       <div
         className={`absolute inset-0 bg-gradient-to-br ${song.color} opacity-70 group-hover:opacity-90 transition-opacity duration-500`}
       ></div>
 
-      {}
       <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors"></div>
 
-      {}
       <div className="absolute inset-0 p-4 flex flex-col justify-between">
-        {}
         <div className="self-end h-4">
           {isPlaying && (
             <div className="flex items-end gap-0.5 h-full">
@@ -394,7 +388,6 @@ function MusicTile({ song, isPlaying, onPlay }) {
           )}
         </div>
 
-        {}
         <div
           className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ${
             isPlaying
@@ -402,7 +395,6 @@ function MusicTile({ song, isPlaying, onPlay }) {
               : "scale-75 opacity-0 group-hover:scale-100 group-hover:opacity-100"
           }`}
         >
-          {}
           <button className="w-10 h-10 bg-white/20 backdrop-blur-md border border-white/40 rounded-full flex items-center justify-center text-white hover:bg-white hover:text-black transition-all shadow-lg">
             {isPlaying ? (
               <Pause size={16} fill="currentColor" />
@@ -412,7 +404,6 @@ function MusicTile({ song, isPlaying, onPlay }) {
           </button>
         </div>
 
-        {}
         <div className="z-10">
           <h4 className="font-bold text-sm leading-tight mb-0.5 drop-shadow-md truncate">
             {song.title}

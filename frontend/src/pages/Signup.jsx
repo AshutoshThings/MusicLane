@@ -1,8 +1,49 @@
-import { User, Mail, Lock, ArrowLeft } from "lucide-react";
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { User, Mail, Lock, ArrowLeft, Loader2 } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 import GradientMesh from "../components/GradientMesh";
 
 export default function Signup() {
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+  });
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+
+    try {
+      const res = await fetch("http://localhost:5001/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Registration failed");
+      }
+
+      //Redirect to login on success
+      navigate("/login");
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="relative min-h-screen flex items-center justify-center px-4 overflow-hidden">
       <GradientMesh />
@@ -17,7 +58,7 @@ export default function Signup() {
 
         <div className="glass p-8 md:p-10 rounded-3xl">
           <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold tracking-tight mb-2">
+            <h2 className="text-2xl font-bold tracking-tight mb-2 text-white">
               Create Account
             </h2>
             <p className="text-zinc-400 text-sm">
@@ -25,7 +66,13 @@ export default function Signup() {
             </p>
           </div>
 
-          <div className="space-y-4">
+          {error && (
+            <div className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm text-center">
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div className="group">
               <label className="block text-zinc-400 text-xs font-medium mb-1.5 ml-1">
                 FULL NAME
@@ -36,9 +83,13 @@ export default function Signup() {
                   size={18}
                 />
                 <input
+                  name="name"
                   type="text"
+                  required
                   placeholder="John Doe"
-                  className="bg-transparent outline-none ml-3 w-full text-sm placeholder:text-zinc-600"
+                  value={formData.name}
+                  onChange={handleChange}
+                  className="bg-transparent outline-none ml-3 w-full text-sm placeholder:text-zinc-600 text-white"
                 />
               </div>
             </div>
@@ -53,9 +104,13 @@ export default function Signup() {
                   size={18}
                 />
                 <input
+                  name="email"
                   type="email"
+                  required
                   placeholder="you@example.com"
-                  className="bg-transparent outline-none ml-3 w-full text-sm placeholder:text-zinc-600"
+                  value={formData.email}
+                  onChange={handleChange}
+                  className="bg-transparent outline-none ml-3 w-full text-sm placeholder:text-zinc-600 text-white"
                 />
               </div>
             </div>
@@ -70,17 +125,29 @@ export default function Signup() {
                   size={18}
                 />
                 <input
+                  name="password"
                   type="password"
+                  required
                   placeholder="••••••••"
-                  className="bg-transparent outline-none ml-3 w-full text-sm placeholder:text-zinc-600"
+                  value={formData.password}
+                  onChange={handleChange}
+                  className="bg-transparent outline-none ml-3 w-full text-sm placeholder:text-zinc-600 text-white"
                 />
               </div>
             </div>
 
-            <button className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-medium text-sm transition-all shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/40 mt-4">
-              Create Account
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-medium text-sm transition-all shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/40 mt-4 disabled:opacity-50 flex justify-center items-center"
+            >
+              {loading ? (
+                <Loader2 className="animate-spin" size={20} />
+              ) : (
+                "Create Account"
+              )}
             </button>
-          </div>
+          </form>
 
           <p className="text-center text-zinc-500 mt-6 text-sm">
             Already have an account?{" "}
